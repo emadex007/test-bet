@@ -1,0 +1,283 @@
+import { useEffect, useState } from "react";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { getProject } from "~/lib/api";
+import { cn, img, useSite, waLink } from "~/lib/ui";
+import { FeatureOff, Lightbox, ListingFacts } from "~/components/ui";
+import { amenityList, formatPrice, isUnavailable } from "~/lib/features";
+import { ArrowLeft, ArrowRight, CheckIcon, FacebookIcon, ImagesIcon, WhatsAppIcon, XIcon } from "~/components/Icons";
+import { pageTitle } from "~/lib/brand";
+
+export const Route = createFileRoute("/portfolio/$slug")({
+  loader: async ({ params }) => {
+    const data = await getProject({ data: params.slug });
+    if (!data) throw notFound();
+    return data;
+  },
+  head: ({ loaderData }) =>
+    loaderData
+      ? {
+          meta: [
+            { title: pageTitle(loaderData.project.title) },
+            { name: "description", content: loaderData.project.summary },
+            { property: "og:title", content: loaderData.project.title },
+            { property: "og:description", content: loaderData.project.summary },
+            { property: "og:image", content: img(loaderData.project.cover_image, 1200) },
+          ],
+        }
+      : {},
+  component: ProjectPage,
+});
+
+function ProjectPage() {
+  const s = useSite();
+  const { project: p, prev, next } = Route.useLoaderData();
+  const [open, setOpen] = useState<number | null>(null);
+  const photos = p.photos;
+  const L = s.labels;
+  const listing = s.features.listings;
+  const details = (
+    listing
+      ? [
+          ["Listing", p.listing_type],
+          ["Property type", p.category],
+          ["Location", p.location],
+          ["Bedrooms", p.bedrooms ? String(p.bedrooms) : ""],
+          ["Bathrooms", p.bathrooms ? String(p.bathrooms) : ""],
+          ["Size", p.area],
+          ["Status", p.status],
+        ]
+      : [
+          ["Category", p.category],
+          ["Location", p.location],
+          ["Year", p.year],
+          ["Duration", p.duration],
+        ]
+  ).filter(([, v]) => v);
+  const amenities = listing ? amenityList(p.amenities) : [];
+  const unavailable = listing && isUnavailable(s, p.status);
+  const askText = L.askMessage.replace("{item}", p.title);
+  if (!s.features.portfolio) return <FeatureOff />;
+
+  return (
+    <>
+      {/* Cover */}
+      <section className="relative flex min-h-[70vh] items-end overflow-hidden bg-primary text-white">
+        <img src={img(p.cover_image, 2400)} alt={p.title} className="absolute inset-0 h-full w-full object-cover" fetchPriority="high" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+        <div className="container-x relative pb-12 pt-32 md:pb-16">
+          <Link to="/portfolio" className="mb-6 inline-flex items-center gap-2 text-sm text-white/80 hover:text-white">
+            <ArrowLeft size={16} /> All {L.items.toLowerCase()}
+          </Link>
+          <p className="eyebrow fade-up mb-3 !text-[color-mix(in_srgb,var(--c-accent)_60%,white)]">
+            {[listing && p.listing_type, p.category].filter(Boolean).join(" · ")}
+          </p>
+          <h1 className="fade-up max-w-4xl text-5xl md:text-7xl">{p.title}</h1>
+          {listing && (
+            <div className="fade-up-2 mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <p className="font-heading text-4xl md:text-5xl">
+                {formatPrice(s.listing.currency, p.price)}
+                {p.price > 0 && p.price_note && <span className="ml-2 font-sans text-base text-white/75">{p.price_note}</span>}
+              </p>
+              {unavailable && <span className="rounded-full bg-white px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-ink">{p.status}</span>}
+              <ListingFacts p={p} className="text-white/85" />
+            </div>
+          )}
+          {p.summary && <p className="fade-up-2 mt-5 max-w-2xl text-white/85 md:text-lg">{p.summary}</p>}
+          {photos.length > 1 && (
+            <button onClick={() => setOpen(0)} className="btn btn-outline fade-up-3 mt-8 text-white">
+              <ImagesIcon size={18} /> View all {photos.length} photos
+            </button>
+          )}
+        </div>
+      </section>
+
+      {/* Details */}
+      <section className="section">
+        <div className="container-x grid gap-12 lg:grid-cols-12">
+          <aside className="lg:col-span-4">
+            <dl className="divide-y divide-line border-y border-line">
+              {details.map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-6 py-4 text-sm">
+                  <dt className="text-muted">{k}</dt>
+                  <dd className="text-right font-medium">{v}</dd>
+                </div>
+              ))}
+              {p.scope && (
+                <div className="py-4 text-sm">
+                  <dt className="mb-2 text-muted">Scope of work</dt>
+                  <dd className="font-medium leading-relaxed">{p.scope}</dd>
+                </div>
+              )}
+            </dl>
+            <div className="mt-8 flex flex-col gap-3">
+              {listing && s.features.booking && !unavailable ? (
+                <Link to="/book" search={{ service: p.title }} className="btn btn-primary">{L.bookCta}</Link>
+              ) : (
+                s.features.quotes && <Link to="/quote" search={{ service: p.title }} className="btn btn-primary">{L.similarCta}</Link>
+              )}
+              {s.contact.whatsapp && (
+                <a href={waLink(s.contact.whatsapp, askText)} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+                  <WhatsAppIcon /> {L.askCta}
+                </a>
+              )}
+            </div>
+            <ShareBar title={p.title} item={L.item} />
+          </aside>
+          <div className="lg:col-span-8">
+            <p className="eyebrow mb-4">{L.aboutItem}</p>
+            <div className="prose-site max-w-none space-y-4 text-lg leading-relaxed">
+              {(p.description || p.summary)
+                .split(/\n{2,}/)
+                .filter(Boolean)
+                .map((para, i) => (
+                  <p key={i} className={cn(i === 0 && "font-heading text-2xl leading-snug md:text-3xl")}>
+                    {para}
+                  </p>
+                ))}
+            </div>
+            {amenities.length > 0 && (
+              <div className="mt-12 border-t border-line pt-10">
+                <h2 className="text-3xl">Features & amenities</h2>
+                <ul className="mt-6 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+                  {amenities.map((a) => (
+                    <li key={a} className="flex items-start gap-3">
+                      <CheckIcon size={18} className="mt-0.5 shrink-0 text-accent" /> {a}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery */}
+      {photos.length > 0 && (
+        <section className="pb-[var(--section-y)]">
+          <div className="container-x">
+            <div className="mb-8 flex items-end justify-between">
+              <h2 className="text-4xl">Gallery</h2>
+              <p className="text-sm text-muted">{photos.length} photo{photos.length === 1 ? "" : "s"} · tap to enlarge</p>
+            </div>
+            <div className="grid auto-rows-[220px] grid-cols-2 gap-3 md:auto-rows-[280px] md:grid-cols-4 md:gap-4">
+              {photos.map((ph, i) => (
+                <button
+                  key={ph.id + ph.url}
+                  onClick={() => setOpen(i)}
+                  className={cn(
+                    "img-zoom group relative overflow-hidden rounded-[var(--radius)] bg-line",
+                    // A varied, magazine-style layout that repeats every 6 photos.
+                    i % 6 === 0 && "col-span-2 row-span-2",
+                    i % 6 === 3 && "md:col-span-2",
+                  )}
+                  aria-label={`Open photo ${i + 1}`}
+                >
+                  <img src={img(ph.url, i % 6 === 0 ? 1600 : 900)} alt={ph.caption || `${p.title} photo ${i + 1}`} loading="lazy" className="h-full w-full object-cover" />
+                  <span className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/15" />
+                  {ph.caption && (
+                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-left text-xs text-white">{ph.caption}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Prev / next */}
+      {(prev || next) && (
+        <nav className="border-t border-line" aria-label={`More ${L.items.toLowerCase()}`}>
+          <div className="container-x grid sm:grid-cols-2">
+            {prev ? (
+              <Link to="/portfolio/$slug" params={{ slug: prev.slug }} className="group flex items-center gap-5 py-10 sm:pr-8">
+                <ArrowLeft size={22} className="shrink-0 transition-transform group-hover:-translate-x-1" />
+                <span className="h-16 w-20 shrink-0 overflow-hidden rounded-sm bg-line">
+                  <img src={img(prev.cover_image, 240)} alt="" className="h-full w-full object-cover" loading="lazy" />
+                </span>
+                <span>
+                  <span className="block text-xs uppercase tracking-wider text-muted">Previous</span>
+                  <span className="font-heading text-2xl">{prev.title}</span>
+                </span>
+              </Link>
+            ) : (
+              <span />
+            )}
+            {next && (
+              <Link to="/portfolio/$slug" params={{ slug: next.slug }} className="group flex items-center justify-end gap-5 border-t border-line py-10 text-right sm:border-l sm:border-t-0 sm:pl-8">
+                <span>
+                  <span className="block text-xs uppercase tracking-wider text-muted">Next</span>
+                  <span className="font-heading text-2xl">{next.title}</span>
+                </span>
+                <span className="h-16 w-20 shrink-0 overflow-hidden rounded-sm bg-line">
+                  <img src={img(next.cover_image, 240)} alt="" className="h-full w-full object-cover" loading="lazy" />
+                </span>
+                <ArrowRight size={22} className="shrink-0 transition-transform group-hover:translate-x-1" />
+              </Link>
+            )}
+          </div>
+        </nav>
+      )}
+
+      {open !== null && <Lightbox photos={photos} index={open} onIndex={setOpen} onClose={() => setOpen(null)} title={p.title} />}
+    </>
+  );
+}
+
+/** Share this project: copy link, WhatsApp, Facebook, X, or the phone's own share menu. */
+function ShareBar({ title, item }: { title: string; item: string }) {
+  const s = useSite();
+  const [copied, setCopied] = useState(false);
+  const [url, setUrl] = useState("");
+  const [canShare, setCanShare] = useState(false);
+  useEffect(() => {
+    setUrl(window.location.href.split("#")[0]);
+    setCanShare(typeof navigator !== "undefined" && "share" in navigator);
+  }, []);
+  const text = `${title} | ${s.brand.name}`;
+  const enc = encodeURIComponent;
+  const btn = "flex h-10 w-10 items-center justify-center rounded-full border border-line transition-colors hover:bg-primary hover:text-on-primary";
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.prompt("Copy this link:", url);
+    }
+  }
+
+  return (
+    <div className="mt-8 border-t border-line pt-6">
+      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">Share this {item.toLowerCase()}</p>
+      <div className="flex flex-wrap items-center gap-2">
+        <a href={`https://wa.me/?text=${enc(`${text}\n${url}`)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on WhatsApp" className={btn}>
+          <WhatsAppIcon size={18} />
+        </a>
+        <a href={`https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook" className={btn}>
+          <FacebookIcon size={18} />
+        </a>
+        <a href={`https://x.com/intent/post?text=${enc(text)}&url=${enc(url)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on X" className={btn}>
+          <XIcon size={16} />
+        </a>
+        <button onClick={copy} className="inline-flex h-10 items-center gap-2 rounded-full border border-line px-4 text-sm font-medium transition-colors hover:bg-primary hover:text-on-primary">
+          {copied ? (
+            <>
+              <CheckIcon size={16} /> Link copied
+            </>
+          ) : (
+            "Copy link"
+          )}
+        </button>
+        {canShare && (
+          <button
+            onClick={() => navigator.share({ title: text, url }).catch(() => {})}
+            className="inline-flex h-10 items-center rounded-full border border-line px-4 text-sm font-medium transition-colors hover:bg-primary hover:text-on-primary lg:hidden"
+          >
+            More…
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}

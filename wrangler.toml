@@ -1,0 +1,39 @@
+name = "emadex-starter"
+main = "./src/server.ts"
+compatibility_date = "2025-09-02"
+compatibility_flags = ["nodejs_compat"]
+
+# Emadex Starter: served on the workers.dev URL first
+workers_dev = true
+
+# --- Custom domain: uncomment once the client's domain is linked to Cloudflare ---
+# routes = [
+#   { pattern = "yourclientdomain.com", custom_domain = true },
+#   { pattern = "www.yourclientdomain.com", custom_domain = true }
+# ]
+
+# --- D1 database (projects, project photos, services, bookings, quotes, chat, staff, site settings) ---
+# Create with:  npx wrangler d1 create emadex_starter_db
+# then paste the returned database_id below.
+[[d1_databases]]
+binding = "DB"
+database_name = "emadex_starter_db"
+database_id = "PASTE_DATABASE_ID_HERE"
+migrations_dir = "migrations"
+
+# --- R2 bucket (logo, banners, portfolio photos, quote-request uploads) ---
+# Create with:  npx wrangler r2 bucket create emadex-starter-media
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "emadex-starter-media"
+
+# --- Secrets: set with `npx wrangler secret put <NAME>`, never commit them ---
+# RESEND_API_KEY        booking / quote / chat notification emails
+# ADMIN_NOTIFY_EMAIL    where new inquiries are sent (can also be set in dashboard)
+
+# --- Weekly database backup to R2 (Mondays 02:00 UTC = 03:00 in Lagos). See Dashboard → Backups. ---
+[triggers]
+crons = ["0 2 * * 1"]
+
+[vars]
+SITE_ENV = "production"

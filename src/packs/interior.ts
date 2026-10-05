@@ -1,0 +1,156 @@
+import { definePack } from "./types";
+
+const U = (id: string, w = 1600) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;
+
+// Interior design, decoration, furniture, home staging. Taken from the Jo-pearl Home Maker build.
+export default definePack({
+  id: "interior",
+  name: "Interior design & decoration",
+  description: "Interior designers, decorators, furniture makers, home stagers. Portfolio with galleries, consultations, detailed quote form.",
+  settings: {
+    theme: {
+      primary: "#1F1B18",
+      onPrimary: "#FAF7F2",
+      accent: "#B08D57",
+      background: "#FAF7F2",
+      surface: "#FFFFFF",
+      text: "#1F1B18",
+      muted: "#6B645C",
+      border: "#E7DFD3",
+      headingFont: "Cormorant Garamond",
+      bodyFont: "Manrope",
+      radius: 4,
+    },
+    topBar: {
+      text: "Free consultation for new projects. Call or WhatsApp us today.",
+      background: "#1F1B18",
+      textColor: "#E9DDC8",
+    },
+    header: {
+      background: "#FAF7F2",
+      textColor: "#1F1B18",
+      nav: [
+        { label: "Home", to: "/" },
+        { label: "About", to: "/about" },
+        { label: "Services", to: "/services" },
+        { label: "Portfolio", to: "/portfolio" },
+        { label: "Contact", to: "/contact" },
+      ],
+      cta: { label: "Get a Quote", to: "/quote" },
+    },
+    hero: {
+      height: 92,
+      image: U("1618221195710-dd6b41faaea6", 2200),
+      overlay: 0.45,
+      eyebrow: "Interior Design & Decoration",
+      title: "Beautiful spaces, made for the way you live",
+      subtitle:
+        "From single rooms to complete homes and offices, {{business}} designs, furnishes and finishes interiors you'll love coming back to.",
+      primaryCta: { label: "View Our Work", to: "/portfolio" },
+      secondaryCta: { label: "Book a Consultation", to: "/book" },
+    },
+    home: {
+      introEyebrow: "Welcome to {{short}}",
+      introTitle: "We turn houses into homes, and offices into places people love to be.",
+      introText:
+        "{{business}} is an interior design and decoration company. We listen to how you live and work, then plan every detail: layout, colours, furniture, lighting, curtains and finishing touches. You get one team from first idea to final handover, and a space that truly feels like you.",
+      introImage: U("1600210491892-03d54c0aaf87", 1400),
+      projectsEyebrow: "Portfolio",
+      projectsTitle: "Recent Projects",
+      projectsText: "Every project has its own story. Click any project to see the full gallery.",
+      processTitle: "A simple process, from idea to handover",
+      process: [
+        { title: "Consultation", text: "We visit or call to understand your space, style, budget and timeline." },
+        { title: "Design & Quote", text: "You receive a design concept, mood boards and a clear, itemised quotation." },
+        { title: "Sourcing & Build", text: "We source furniture and materials and manage every trade on site." },
+        { title: "Styling & Handover", text: "Final styling, a walk-through with you, and a space ready to enjoy." },
+      ],
+      ctaTitle: "Ready to transform your space?",
+      ctaText: "Tell us about your space and we'll come back with ideas and a free quote.",
+      ctaImage: U("1616594039964-ae9021a400a0", 2000),
+    },
+    about: {
+      heroImage: U("1583847268964-b28dc8f51f92", 2200),
+      intro: "Interior design and decoration with care, craft and attention to detail.",
+      story:
+        "{{business}} was built on a simple belief: everyone deserves a space that makes them feel good. We design and decorate homes, apartments, offices and commercial spaces, combining good planning with beautiful materials and finishing.\n\nWe work closely with every client, keep you updated at each stage, and take pride in delivering on time and on budget. Whether it's one room or a full building, we treat it like our own.",
+      image: U("1616486029423-aaa4789e8c9a", 1400),
+      values: [
+        { title: "Attention to detail", text: "Every finish, fabric and fitting is chosen with purpose." },
+        { title: "Honest pricing", text: "Clear, itemised quotations with no surprises." },
+        { title: "On-time delivery", text: "We plan carefully and keep you updated at every stage." },
+        { title: "Lasting quality", text: "Materials and workmanship that stand the test of time." },
+      ],
+    },
+    pages: {
+      portfolioTitle: "Our Portfolio",
+      portfolioIntro: "A selection of homes, offices and commercial spaces we've designed and decorated.",
+      portfolioImage: U("1600494448850-6013c64ba722", 2200),
+      servicesIntro: "Everything you need to create a beautiful, functional space, handled by one team.",
+      servicesImage: U("1671197244266-73129c97c096", 2200),
+      bookIntro: "Choose a day that suits you and we'll confirm your site visit or call.",
+      quoteIntro: "Tell us about your space. The more detail you share, the more accurate our quotation will be.",
+      formsImage: U("1606744888344-493238951221", 2200),
+    },
+    contact: {
+      whatsappMessage: "Hello {{business}}, I'd like to make an enquiry about an interior project.",
+    },
+    footer: {
+      background: "#1F1B18",
+      textColor: "#E9E2D6",
+      about: "Interior design and decoration for homes, apartments, offices and commercial spaces. {{tagline}}",
+    },
+    seo: {
+      title: "{{business}} | Interior Design & Decoration",
+      description:
+        "{{business}} designs and decorates homes, apartments, offices and commercial spaces in {{city}}. View our portfolio, book a consultation or request a free quote.",
+      ogImage: U("1618221195710-dd6b41faaea6", 1200),
+    },
+    quotes: {
+      intro: "Thank you for considering {{business}}. Below is our quotation for your project.",
+      terms:
+        "Prices are in Naira and valid until the date shown. Final costs may change if the scope of work changes after a site visit. Work begins once the quotation is accepted and agreed with our team.",
+    },
+    chat: {
+      greeting: "Hi there! 👋 Ask us anything about your space, our services or a quote. We'll reply as soon as we can.",
+    },
+    labels: {
+      item: "Project",
+      items: "Projects",
+      portfolioEyebrow: "Our work",
+      aboutItem: "About the project",
+      bookCta: "Book a Consultation",
+      quoteCta: "Request a Quote",
+      similarCta: "Get a quote for a similar project",
+      askCta: "Ask about this project",
+      askMessage: "Hello {{business}}, I saw the \"{item}\" project on your website and I'd like something similar.",
+    },
+    forms: {
+      quoteStep: "About the project",
+      typeLabel: "Type of project",
+      types: ["Home / House", "Apartment", "Office", "Shop / Restaurant", "Short-let / Hotel", "Other"],
+      multiLabel: "Which spaces?",
+      multi: ["Living room", "Bedroom", "Kitchen", "Dining", "Bathroom", "Children's room", "Office / Study", "Reception", "Whole space"],
+      styleLabel: "Preferred style",
+      styles: ["Modern", "Contemporary", "Classic / Luxury", "Minimalist", "African / Afro-modern", "Not sure, help me decide"],
+      sizeLabel: "Approximate size",
+      sizePlaceholder: "e.g. 3-bedroom flat, or 120 sqm",
+      locationLabel: "Project location",
+      budgets: ["Under ₦1M", "₦1M to ₦3M", "₦3M to ₦7M", "₦7M to ₦15M", "Above ₦15M", "Not sure yet"],
+      timelineLabel: "When do you want to start?",
+      timelines: ["As soon as possible", "Within 1 month", "1 to 3 months", "3+ months", "Just planning"],
+      detailsPlaceholder: "What would you like done? Colours you love, furniture to keep, anything we should know…",
+      photosLabel: "Photos of the space",
+      photosHint: "Current photos or inspiration images help us quote more accurately.",
+      quoteSuccessTitle: "Quote request received",
+      quoteSuccessText: "Thank you, {first}. Our team will review your project and send you a quotation. We may call you if we need more details.",
+      bookingEyebrow: "Consultation",
+      bookingTypes: ["Site visit", "Office visit", "Phone / video call"],
+      addressFor: "Site visit",
+      addressLabel: "Site address",
+      notesLabel: "Tell us a little about the project",
+      notesPlaceholder: "Rooms, style you like, budget range, anything we should know…",
+    },
+    layout: { feel: "elegant", header: "centered", hero: "full", services: "rows", cards: "overlay", testimonials: "quote", footer: "full", homeOrder: ["intro", "projects", "services", "process", "testimonials", "clients", "faq", "cta"] },
+  },
+});
